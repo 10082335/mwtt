@@ -50,58 +50,6 @@ function banner
 ############################    FILE GENERATORS
 ################################################################################
 
-function generate_docker_compose_ngninx # $XX_NAME
-{
-  if [ ! -f $PERSISTANT_FOLDER/$APP_NAME/docker-compose.nginx.yaml ]
-  then 
-    cat <<EOF > $PERSISTANT_FOLDER/$APP_NAME/docker-compose.nginx.yaml
-version: '3.5'
-services:    
-    nginx:
-        image: "jwilder/nginx-proxy:1.2.3"
-        container_name: "mist-nginx"
-        ports:
-            - "443:443"
-        volumes:
-            - $NGINX_CERTS_FOLDER:/etc/nginx/certs:ro  
-            - /var/run/docker.sock:/tmp/docker.sock:ro        
-            - /etc/nginx/vhost.d
-        restart: always
-        networks:
-            - mist-net-nginx
-
-
-networks:
-    mist-net-nginx:
-        driver: bridge
-        name: mist-net-nginx
-EOF
-  fi
-}
-function generate_docker_compose_mongodb # $XX_NAME
-{
-  if [ ! -f $PERSISTANT_FOLDER/$APP_NAME/docker-compose.mongodb.yaml ]
-  then 
-    cat <<EOF > $PERSISTANT_FOLDER/$APP_NAME/docker-compose.mongodb.yaml
-version: '3.5'
-services:    
-    mongodb:
-        image: "mongo"
-        container_name: "mist-mongodb"
-        restart: always
-        volumes: 
-            - $MONGO_FOLDER:/data/db
-        networks:
-            - mist-net-mongodb
-
-networks:
-    mist-net-mongodb:
-        driver: bridge
-        name: mist-net-mongodb
-
-EOF
-  fi
-}
 function generate_docker_compose_app # $XX_NAME
 {
   if [ ! -f $PERSISTANT_FOLDER/$APP_NAME/docker-compose.$APP_NAME.yaml ]
@@ -109,20 +57,14 @@ function generate_docker_compose_app # $XX_NAME
     cat <<EOF > $PERSISTANT_FOLDER/$APP_NAME/docker-compose.$APP_NAME.yaml
 version: '3.5'
 services:    
-    $APP_NAME: 
-        image: $APP_IMG
-        container_name: "mist-$APP_NAME"
-        external_links: 
-            - nginx
-        environment:
-            - VIRTUAL_HOST=$APP_VHOST
+    mwtt: 
+        image: tmunzer/mwtt
+        container_name: "mist-mwtt-standalone"
+        ports:
+            - "80:51361"
         volumes:
-            - $PERSISTANT_FOLDER/$APP_NAME/config.py:/app/config.py:ro         
-        networks:            
-            - mist-net-nginx
-networks:
-  mist-net-nginx:
-    name: mist-net-nginx
+            - $PERSISTANT_FOLDER/$APP_NAME/config.py:/app/config.py:ro            
+            
 EOF
   fi
 }
