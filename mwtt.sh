@@ -530,21 +530,6 @@ function script_conf
   echo "" >> $SCRIPT_CONF
 }
 
-function update_vhost
-{
-  echo "To use the NGINX reverse proxy, we will need a dedicated DNS entry for the application."
-  echo "Web browsers will access the application interface from this FQDN."
-  response=""
-  while ! echo "x$response" | grep -i "xy" > /dev/null
-  do
-    read -p "Application DNS name: " APP_VHOST
-    read -p "Are you sure (y/n)? " response
-    echo ""
-  done
-  echo "$APP_NAME-APP_VHOST=$APP_VHOST" >> $SCRIPT_CONF
-  echo "" >> $SCRIPT_CONF
-}
-
 function init_script_conf
 {
   if [ ! -f "$SCRIPT_CONF" ]
@@ -644,93 +629,6 @@ function check_folder # $name $FOLDER_NAME
     echo -e "${INFOC}INFO${NC}: $1 folder already exists."
   fi
 }
-
-################################################################################
-############################    CERTIFICATES
-################################################################################
-
-function check_certificates
-{
-    if [ `ls $NGINX_CERTS_FOLDER | grep $APP_VHOST.key | wc -l` -eq 0 ] || [ `ls $NGINX_CERTS_FOLDER | grep $APP_VHOST.crt | wc -l` -eq 0 ]
-    then
-        echo -e "${INFOC}INFO${NC}: Certificates for $APP_VHOST doesn't exist."
-        echo "     Creating a self-signed certificate..."
-        openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout $NGINX_CERTS_FOLDER/$APP_VHOST.key -out $NGINX_CERTS_FOLDER/$APP_VHOST.crt
-        echo -e "${INFOC}INFO${NC}: Certificate for $APP_VHOST created."
-    else
-        echo -e "${INFOC}INFO${NC}: Certificate for $APP_VHOST already exists."
-    fi
-}
-
-function new_certificate
-{
-    if [ -f "$NGINX_CERTS_FOLDER/$APP_VHOST.crt" ]
-    then
-      echo -e "${INFOC}INFO${NC}: removing $NGINX_CERTS_FOLDER/$APP_VHOST.crt"
-      rm $NGINX_CERTS_FOLDER/$APP_VHOST.crt
-    fi
-    if [ -f "$NGINX_CERTS_FOLDER/$APP_VHOST.key" ]
-    then
-      echo -e "${INFOC}INFO${NC}: removing $NGINX_CERTS_FOLDER/$APP_VHOST.key"
-      rm $NGINX_CERTS_FOLDER/$APP_VHOST.key
-    fi
-    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout $NGINX_CERTS_FOLDER/$APP_VHOST.key -out $NGINX_CERTS_FOLDER/$APP_VHOST.crt
-    echo -e "${INFOC}INFO${NC}: Certificate for $APP_VHOST created."
-  
-}
-
-function new_csr
-{
-  openssl req -out $NGINX_CERTS_FOLDER/$APP_VHOST.csr -new -newkey rsa:2048 -nodes -keyout $NGINX_CERTS_FOLDER/$APP_VHOST.key
-  echo -e "${INFOC}INFO${NC}: new CSR generated. The CSR $APP_VHOST.csr can be found in the folder $NGINX_CERTS_FOLDER"
-  echo -e "${WARNINGC}WARNING${NC}: To be able to use the application, you will have to sign the CSR with"
-  echo "         your Certificate Authority."
-  echo "         The signed certificate has to be place into the folder"
-  echo "         $NGINX_CERTS_FOLDER with the name $APP_VHOST.crt"
-}
-
-function help_certificate
-{
-  echo -e "${INFOC}INFO${NC}: You can replace the self-signed certicate with your own certicate."
-  echo "      To do so, you will have to generate a signed certificate on your own,"
-  echo "      and to place the certificate and its private key into the folder"
-  echo "      $NGINX_CERTS_FOLDER"
-  echo "      The certificate has to be a X509 certificate in PEM format."
-  echo "      At the end, you should have:"
-  echo "      $NGINX_CERTS_FOLDER/$APP_VHOST.crt"
-  echo "      $NGINX_CERTS_FOLDER/$APP_VHOST.key"
-}
-
-function read_certificate
-{
-  openssl x509 -in $NGINX_CERTS_FOLDER/$APP_VHOST.crt -noout -text
-}
-
-function menu_certificates
-{
-  response=""
-  while ! echo "x$response" | grep -i "xb" > /dev/null
-  do
-    echo ""
-    echo "1) Generate new self-signed certificate"
-    echo "2) Generate CSR"
-    echo "3) Help to use custom certificate"
-    echo "4) View current Certificate"
-    echo "b) Back"
-    echo "Please make a choice"
-    read response
-    case $response in
-      "x1") new_certificate;;
-      "x2") new_csr;;
-      "x3") help_certificate;;
-      "x4") read_certificate;;
-      "xb") menu_main;;
-    esac
-  done
-}
-
-
-
 ################################################################################
 ############################    FILES VALIDATORS
 ################################################################################
