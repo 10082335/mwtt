@@ -582,17 +582,11 @@ function init_script_conf
   fi
   if echo "$PERSISTANT_FOLDER" | grep -i [a-z] > /dev/null
   then
-    MONGO_FOLDER="$PERSISTANT_FOLDER/$DB_FOLDER"
-    NGINX_CERTS_FOLDER="$PERSISTANT_FOLDER/$NGINX_CERTS_FOLDER"
     DOCKER_COMPOSE_FOLDER="$PERSISTANT_FOLDER/container-enable"
     echo -e "${INFOC}INFO${NC}: Script configuration loaded succesfully."
   else
     echo -e "${ERRORC}ERROR${NC}: not able to load Script configuration. Exiting..."
     exit 254
-  fi
-  if [ ! "$APP_VHOST" ]
-  then
-    update_vhost    
   fi
 }
 
