@@ -127,7 +127,8 @@ def new_event(req, mist_conf, channels, slack_conf, msteams_conf):
         return '', 401
     elif secret:
         console.info("Webhook signature confirmed")
-    console.info("Processing new webhook message")
+    console.info("Processing new Mist webhook message")
+    console.debug(f"message: {req.data}")
     content = req.get_json()
     console.debug(content)
     topic = content["topic"]
