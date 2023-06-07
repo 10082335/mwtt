@@ -577,8 +577,6 @@ function check_folder # $name $FOLDER_NAME
 function generate_docker_compose_file 
 {
   case $1 in
-    "nginx") generate_docker_compose_ngninx;;
-    "mongodb") generate_docker_compose_mongodb;;
     $APP_NAME) generate_docker_compose_app;;
   esac 
 }
